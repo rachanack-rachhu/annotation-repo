@@ -1,0 +1,39 @@
+steps:
+  # Step 1: The 5 Minute Wait (Replicating 'pre_build')
+  - name: 'ubuntu'
+    args: ['sleep', '300']
+    id: 'waiting-phase'
+
+  # Step 2: Install Dependencies & Run Script (Replicating 'build')
+  # We combine these because changes (like installing ffmpeg) only exist
+  # inside the running step.
+  - name: 'python:3.9'
+    dir: 'annotation-pipeline'  # <--- This replaces "cd ./annotation-pipeline"
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Installing FFmpeg..."
+        apt-get update && apt-get install -y ffmpeg
+        
+        echo "Installing Python Requirements..."
+        pip install -r requirements.txt
+        
+        echo "Running Script..."
+        python3 annotations.py
+    env:
+      - 'S3_KEY=${_FILE_NAME}'
+      - 'GCS_BUCKET=${_BUCKET_NAME}'
+
+# Step 3: Save Artifacts
+artifacts:
+  objects:
+    # AWS had 'base-directory: annotation-pipeline', so we look inside that folder
+    location: 'gs://annotation-output-bucket/results/${_FILE_NAME}/'
+    paths: 
+      - 'annotation-pipeline/frames/*'
+      - 'annotation-pipeline/predict/*'
+      - 'annotation-pipeline/inspection.csv'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
