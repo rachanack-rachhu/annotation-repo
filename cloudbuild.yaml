@@ -1,14 +1,13 @@
 steps:
-  # Step 1: The 5 Minute Wait (Replicating 'pre_build')
+  # Step 1: The 5 Minute Wait
   - name: 'ubuntu'
     args: ['sleep', '300']
     id: 'waiting-phase'
 
-  # Step 2: Install Dependencies & Run Script (Replicating 'build')
-  # We combine these because changes (like installing ffmpeg) only exist
-  # inside the running step.
+  # Step 2: Install Dependencies & Run Script
   - name: 'python:3.9'
-    dir: 'annotation-pipeline'  # <--- This replaces "cd ./annotation-pipeline"
+    # --- FIX IS HERE: Point to the correct nested folder ---
+    dir: 'annotation-project/annotation-pipeline' 
     entrypoint: 'bash'
     args:
       - '-c'
@@ -28,12 +27,12 @@ steps:
 # Step 3: Save Artifacts
 artifacts:
   objects:
-    # AWS had 'base-directory: annotation-pipeline', so we look inside that folder
-    location: 'gs://annotation-output-bucket/results/${_FILE_NAME}/'
+    location: 'gs://annotation-output-bucket-unique-123/results/${_FILE_NAME}/'
     paths: 
-      - 'annotation-pipeline/frames/*'
-      - 'annotation-pipeline/predict/*'
-      - 'annotation-pipeline/inspection.csv'
+      # --- ARTIFACT PATHS ALSO UPDATED ---
+      - 'annotation-project/annotation-pipeline/frames/*'
+      - 'annotation-project/annotation-pipeline/predict/*'
+      - 'annotation-project/annotation-pipeline/inspection.csv'
 
 options:
   logging: CLOUD_LOGGING_ONLY
