@@ -27,7 +27,7 @@ steps:
 # Step 3: Save Artifacts
 artifacts:
   objects:
-    location: 'gs://annotation-output-bucket-unique-123/results/${_FILE_NAME}/'
+    location: 'gs://annotation-output-bucket/results/${_FILE_NAME}/'
     paths: 
       # --- ARTIFACT PATHS ALSO UPDATED ---
       - 'annotation-project/annotation-pipeline/frames/*'
